@@ -47,7 +47,7 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 --max-line-length=100 .
+          flake8 --max-line-length=120 .
 
   deploy:
     needs: [ typing, linting ]
