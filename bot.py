@@ -1,5 +1,7 @@
 import logging
 import os
+import signal
+import sys
 
 import discord
 from discord.ext import commands
@@ -40,5 +42,12 @@ class Bot(commands.Bot):
         """Override on_ready to log when the bot is ready."""
         logger.info("Logged in as %s", self.user.name)
 
+    async def close(self):
+        """Override close to log when the bot is closed."""
+        await super().close()
+        logger.info("Bot closed.")
 
-Bot().run(TOKEN)
+
+bot = Bot()
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+bot.run(TOKEN)
