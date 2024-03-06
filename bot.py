@@ -11,9 +11,7 @@ from settings import TOKEN
 logger = logging.getLogger("discord")
 
 
-class Bot(commands.Bot):
-    """Custom bot class to load extensions and log errors."""
-
+class MyBot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(
             intents=discord.Intents.all(),
@@ -49,6 +47,6 @@ class Bot(commands.Bot):
         logger.info("Bot closed.")
 
 
-bot = Bot()
+bot = MyBot()
 signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
 bot.run(TOKEN)
