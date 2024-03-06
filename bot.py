@@ -26,7 +26,7 @@ class Bot(commands.Bot):
         """Override load_extension to log errors."""
         try:
             super().load_extension(name)
-        except Exception as error:
+        except commands.ExtensionError as error:
             logger.error("Failed to load extension %s: %s", name, error)
 
     async def setup_hook(self):
