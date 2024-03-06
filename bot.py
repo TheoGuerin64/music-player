@@ -32,8 +32,8 @@ class MyBot(commands.Bot):
     async def setup_hook(self) -> None:
         """Override setup_hook to load extensions."""
         for file in os.listdir("./extensions"):
-            if not file.endswith(".py"):
-                await self.load_extension(f"cogs.{file[:-3]}")
+            if file.endswith(".py"):
+                await self.load_extension(f"extensions.{file[:-3]}")
         logger.info("Extensions loaded.")
 
     async def on_ready(self) -> None:
