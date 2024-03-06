@@ -3,6 +3,8 @@ services:
     container_name: bot
     image: bot
     build: .
+    env_file:
+      - ./.env
     networks:
       - internal
     logging:
