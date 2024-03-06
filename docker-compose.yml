@@ -1,0 +1,13 @@
+services:
+  bot:
+    container_name: bot
+    image: bot
+    build: .
+    networks:
+      - internal
+    logging:
+      driver: local
+    restart: unless-stopped
+networks:
+  internal:
+    driver: bridge
