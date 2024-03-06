@@ -25,7 +25,6 @@ class Admin(commands.Cog):
         if interaction.channel is None or not hasattr(interaction.channel, "purge"):
             await interaction.followup.send("This command can not be used here.", ephemeral=True)
             return
-        await self.bot.tree.sync()
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
         await interaction.followup.send(f"{len(deleted)} message(s) deleted.", ephemeral=True)
 
