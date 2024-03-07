@@ -32,8 +32,7 @@ class Admin(commands.Cog):
             number: The number of messages to delete.
         """
         if interaction.channel is None or not hasattr(interaction.channel, "purge"):
-            await interaction.response.send_message("This command can not be used here.", ephemeral=True)
-            return
+            raise commands.CommandError("This command can not be used here.")
 
         await interaction.response.defer(thinking=True, ephemeral=True)
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
@@ -50,8 +49,7 @@ class Admin(commands.Cog):
             channel: The welcome channel.
         """
         if interaction.guild is None:
-            await interaction.response.send_message("This command can not be used here.", ephemeral=True)
-            return
+            raise commands.CommandError("This command can not be used here.")
 
         if channel is None:
             db.set_welcome_channel_id(interaction.guild.id, None)
