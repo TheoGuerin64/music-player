@@ -7,7 +7,7 @@ from discord.ext import commands
 logger = logging.getLogger(__name__)
 
 
-class error_handler(commands.Cog):
+class ErrorHandler(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         bot.tree.on_error = self.on_error
@@ -22,4 +22,4 @@ class error_handler(commands.Cog):
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(error_handler(bot))
+    await bot.add_cog(ErrorHandler(bot))
