@@ -19,7 +19,7 @@ class Admin(commands.Cog):
         """Sync the bot."""
         await interaction.response.defer(thinking=True, ephemeral=True)
         await self.bot.tree.sync()
-        await interaction.followup.send("Synced.", ephemeral=True)
+        await interaction.followup.send("Synced.")
 
     @app_commands.command()
     @app_commands.describe()
@@ -37,7 +37,7 @@ class Admin(commands.Cog):
 
         await interaction.response.defer(thinking=True, ephemeral=True)
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
-        await interaction.followup.send(f"{len(deleted)} message(s) deleted.", ephemeral=True)
+        await interaction.followup.send(f"{len(deleted)} message(s) deleted.")
 
     @app_commands.command()
     @app_commands.describe()
