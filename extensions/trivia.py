@@ -8,7 +8,7 @@ from discord import Interaction, app_commands
 from discord.app_commands import Choice
 from discord.ext import commands
 
-URL_TEMPLATE = Template("https://the-trivia-api.com/api/questions?limit=1&difficulty=$difficulty&Categories=$category")
+URL_TEMPLATE = Template("https://the-trivia-api.com/api/questions?limit=1&difficulty=$difficulty&categories=$category")
 
 
 class Retry(discord.ui.Button):
