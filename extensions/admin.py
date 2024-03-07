@@ -1,6 +1,10 @@
+from typing import Optional
+
 import discord
-from discord import app_commands
+from discord import Interaction, app_commands
 from discord.ext import commands
+
+from db import db
 
 
 class Admin(commands.Cog):
@@ -11,22 +15,39 @@ class Admin(commands.Cog):
     @app_commands.command(name="sync", description="Sync the bot.")
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def sync(self, interaction: discord.Interaction):
+    async def sync(self, interaction: Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        await self.bot.tree.sync(guild=interaction.guild)
+        await self.bot.tree.sync()
         await interaction.followup.send("Synced.", ephemeral=True)
 
     @app_commands.command(name="clear", description="Clear messages.")
     @app_commands.describe(number="The number of messages to delete.")
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def clear(self, interaction: discord.Interaction, number: int) -> None:
-        await interaction.response.defer(thinking=True, ephemeral=True)
+    async def clear(self, interaction: Interaction, number: int) -> None:
         if interaction.channel is None or not hasattr(interaction.channel, "purge"):
-            await interaction.followup.send("This command can not be used here.", ephemeral=True)
+            await interaction.response.send_message("This command can not be used here.", ephemeral=True)
             return
+
+        await interaction.response.defer(thinking=True, ephemeral=True)
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
         await interaction.followup.send(f"{len(deleted)} message(s) deleted.", ephemeral=True)
+
+    @app_commands.command(name="set_welcome_channel", description="Set the welcome channel.")
+    @app_commands.describe(channel="The welcome channel.")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
+    async def set_welcome_channel(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message("This command can not be used here.", ephemeral=True)
+            return
+
+        if channel is None:
+            db.set_welcome_channel_id(interaction.guild.id, None)
+            await interaction.response.send_message("Welcome channel removed.", ephemeral=True)
+        else:
+            db.set_welcome_channel_id(interaction.guild.id, channel.id)
+            await interaction.response.send_message(f"Welcome channel set to {channel.mention}.", ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:

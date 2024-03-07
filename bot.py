@@ -6,6 +6,7 @@ import sys
 import discord
 from discord.ext import commands
 
+from db import db
 from settings import TOKEN
 
 logger = logging.getLogger("discord")
@@ -47,6 +48,12 @@ class MyBot(commands.Bot):
         logger.info("Bot closed.")
 
 
-bot = MyBot()
-signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
-bot.run(TOKEN)
+def main() -> None:
+    db.setup()
+    bot = MyBot()
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+    bot.run(TOKEN)
+
+
+if __name__ == "__main__":
+    main()
