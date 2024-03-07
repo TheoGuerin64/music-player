@@ -12,19 +12,25 @@ class Admin(commands.Cog):
         super().__init__()
         self.bot = bot
 
-    @app_commands.command(name="sync", description="Sync the bot.")
+    @app_commands.command()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def sync(self, interaction: Interaction):
+        """Sync the bot."""
         await interaction.response.defer(thinking=True, ephemeral=True)
         await self.bot.tree.sync()
         await interaction.followup.send("Synced.", ephemeral=True)
 
-    @app_commands.command(name="clear", description="Clear messages.")
-    @app_commands.describe(number="The number of messages to delete.")
+    @app_commands.command()
+    @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def clear(self, interaction: Interaction, number: int) -> None:
+        """Clear messages.
+
+        Args:
+            number: The number of messages to delete.
+        """
         if interaction.channel is None or not hasattr(interaction.channel, "purge"):
             await interaction.response.send_message("This command can not be used here.", ephemeral=True)
             return
@@ -33,11 +39,16 @@ class Admin(commands.Cog):
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
         await interaction.followup.send(f"{len(deleted)} message(s) deleted.", ephemeral=True)
 
-    @app_commands.command(name="set_welcome_channel", description="Set the welcome channel.")
-    @app_commands.describe(channel="The welcome channel.")
+    @app_commands.command()
+    @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def set_welcome_channel(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+        """Set the welcome channel.
+
+        Args:
+            channel: The welcome channel.
+        """
         if interaction.guild is None:
             await interaction.response.send_message("This command can not be used here.", ephemeral=True)
             return
