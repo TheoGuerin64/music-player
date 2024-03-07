@@ -8,3 +8,4 @@ def get_env(key: str) -> str:
 
 
 TOKEN = get_env("TOKEN")
+NASA_API_KEY = get_env("NASA_API_KEY")
