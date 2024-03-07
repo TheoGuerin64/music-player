@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Events(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot = bot
 
@@ -30,5 +30,5 @@ class Events(commands.Cog):
         await channel.send(f"Bienvenue {member.mention}, lis les règles et amuse toi !")
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Events(bot))

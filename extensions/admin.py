@@ -15,7 +15,7 @@ class Admin(commands.Cog):
     @app_commands.command()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def sync(self, interaction: Interaction):
+    async def sync(self, interaction: Interaction) -> None:
         """Sync the bot."""
         await interaction.response.defer(thinking=True, ephemeral=True)
         await self.bot.tree.sync()
