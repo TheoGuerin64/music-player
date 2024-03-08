@@ -37,7 +37,7 @@ async def rover_date_arg(name: str, date: Optional[str]) -> str:
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
-            raise commands.CommandError("Invalid date format. (format: YYYY-MM-DD)")
+            raise app_commands.AppCommandError("Invalid date format. (format: YYYY-MM-DD)")
         return "earth_date=" + date
 
 
@@ -87,7 +87,7 @@ class Space(commands.Cog):
                 data = await response.json()
 
         if not data["photos"]:
-            raise commands.CommandError("No pictures found, try again.")
+            raise app_commands.AppCommandError("No pictures found, try again.")
         photo = random.choice(data["photos"])
 
         embed = discord.Embed(timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d"))

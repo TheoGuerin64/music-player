@@ -16,7 +16,7 @@ class ErrorHandler(commands.Cog):
             send = interaction.followup.send
         else:
             send = interaction.response.send_message
-        if isinstance(error, commands.CommandError):
+        if isinstance(error, app_commands.errors.AppCommandError):
             await send(str(error))
             logger.error(error)
         else:
