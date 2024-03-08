@@ -6,23 +6,18 @@ from discord.ext import commands
 logger = logging.getLogger(__name__)
 
 
-class ErrorHandler(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-        bot.tree.on_error = self.on_error
-
-    async def on_error(self, interaction: Interaction, error: app_commands.AppCommandError) -> None:
-        if interaction.response.is_done():
-            send = interaction.followup.send
-        else:
-            send = interaction.response.send_message
-        if isinstance(error, app_commands.errors.AppCommandError):
-            await send(str(error))
-            logger.error(error)
-        else:
-            await send("An error occurred.")
-            logger.error(error, exc_info=True)
+async def on_error(interaction: Interaction, error: app_commands.AppCommandError) -> None:
+    if interaction.response.is_done():
+        send = interaction.followup.send
+    else:
+        send = interaction.response.send_message
+    if isinstance(error, app_commands.errors.AppCommandError):
+        await send(str(error))
+        logger.error(error)
+    else:
+        await send("An error occurred.")
+        logger.error(error, exc_info=True)
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(ErrorHandler(bot))
+    bot.tree.on_error = on_error
