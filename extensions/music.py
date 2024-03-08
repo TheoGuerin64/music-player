@@ -6,10 +6,8 @@ from discord.ext import commands
 
 
 class Music(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.bot = bot
-        self.voice_client: Optional[discord.VoiceClient] = None
 
     @app_commands.command()
     @app_commands.describe()
@@ -28,20 +26,21 @@ class Music(commands.Cog):
                 raise app_commands.AppCommandError("You are not connected to a voice channel.")
             channel = interaction.user.voice.channel
 
-        self.voice_client = await channel.connect()
+        await channel.connect()
         await interaction.response.send_message(f"Joined {channel.name}", ephemeral=True)
 
     @app_commands.command()
     @app_commands.guild_only()
     async def stop(self, interaction: Interaction) -> None:
         """Stop the music and leave the voice channel."""
-        if self.voice_client is None:
+        if interaction.guild is None:
+            raise app_commands.AppCommandError("This command must be used in a guild.")
+        if interaction.guild.voice_client is None:
             raise app_commands.AppCommandError("Not connected to a voice channel.")
 
-        await self.voice_client.disconnect()
-        self.voice_client = None
+        await interaction.guild.voice_client.disconnect(force=True)
         await interaction.response.send_message("Disconnected", ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Music(bot))
+    await bot.add_cog(Music())
