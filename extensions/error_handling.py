@@ -18,9 +18,10 @@ class ErrorHandler(commands.Cog):
             send = interaction.response.send_message
         if isinstance(error, commands.CommandError):
             await send(str(error))
+            logger.error(error)
         else:
             await send("An error occurred.")
-        logger.error(error, exc_info=True)
+            logger.error(error, exc_info=True)
 
 
 async def setup(bot: commands.Bot) -> None:
