@@ -73,8 +73,7 @@ class Music(commands.Cog):
     @app_commands.guild_only()
     async def stop(self, interaction: Interaction) -> None:
         """Stop the music and leave the voice channel."""
-        if interaction.guild is None:
-            raise app_commands.AppCommandError("This command must be used in a guild.")
+        assert interaction.guild is not None
         if interaction.guild.voice_client is None:
             raise app_commands.AppCommandError("Not connected to a voice channel.")
 
@@ -92,8 +91,7 @@ class Music(commands.Cog):
         """
         if volume < 0 or volume > 100:
             raise app_commands.AppCommandError("Volume must be between 0 and 100.")
-        if interaction.guild is None:
-            raise app_commands.AppCommandError("This command must be used in a guild.")
+        assert interaction.guild is not None
         if interaction.guild.voice_client is None:
             raise app_commands.AppCommandError("Not connected to a voice channel.")
 
@@ -117,6 +115,7 @@ class Music(commands.Cog):
             if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
                 raise app_commands.AppCommandError("You are not connected to a voice channel.")
             await interaction.user.voice.channel.connect()
+        assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
 
         await interaction.response.defer(ephemeral=True)
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
