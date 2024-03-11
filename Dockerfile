@@ -3,6 +3,7 @@ FROM python:3.11
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
+RUN apt-get update && apt-get install -y ffmpeg
 RUN python -m pip install --no-cache-dir --upgrade pip
 
 WORKDIR /bot
