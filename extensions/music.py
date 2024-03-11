@@ -1,4 +1,5 @@
 import asyncio
+import time
 from asyncio import AbstractEventLoop
 from typing import Optional
 
@@ -66,7 +67,7 @@ class Music(commands.Cog):
                 raise app_commands.AppCommandError("You are not connected to a voice channel.")
             channel = interaction.user.voice.channel
 
-        await channel.connect()
+        await channel.connect(timeout=10)
         await interaction.response.send_message(f"Joined {channel.name}", ephemeral=True)
 
     @app_commands.command()
@@ -116,7 +117,7 @@ class Music(commands.Cog):
             assert isinstance(interaction.user, discord.Member)
             if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
                 raise app_commands.AppCommandError("You are not connected to a voice channel.")
-            await interaction.user.voice.channel.connect()
+            await interaction.user.voice.channel.connect(timeout=10)
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
 
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
