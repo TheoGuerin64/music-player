@@ -1,5 +1,4 @@
 import asyncio
-import time
 from asyncio import AbstractEventLoop
 from typing import Optional
 
