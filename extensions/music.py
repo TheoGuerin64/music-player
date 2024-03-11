@@ -109,6 +109,8 @@ class Music(commands.Cog):
         Args:
             query: The query to search for or a url to play.
         """
+        await interaction.response.defer(ephemeral=True)
+
         assert isinstance(interaction.guild, discord.Guild)
         if not isinstance(interaction.guild.voice_client, discord.VoiceClient):
             assert isinstance(interaction.user, discord.Member)
@@ -117,7 +119,6 @@ class Music(commands.Cog):
             await interaction.user.voice.channel.connect()
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
 
-        await interaction.response.defer(ephemeral=True)
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
         interaction.guild.voice_client.play(player, after=lambda e: print(f"Player error: {e}") if e else None)
 
