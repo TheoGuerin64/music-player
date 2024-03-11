@@ -97,7 +97,12 @@ class Music(commands.Cog):
         if interaction.guild is None:
             raise app_commands.AppCommandError("This command must be used in a guild.")
         if interaction.guild.voice_client is None:
-            raise app_commands.AppCommandError("Not connected to a voice channel.")
+            assert isinstance(interaction.user, discord.Member)
+            if interaction.user.voice is None or interaction.user.voice.channel is None:
+                raise app_commands.AppCommandError("You are not connected to a voice channel.")
+            if not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
+                raise app_commands.AppCommandError("You are not connected to a voice channel.")
+            await interaction.user.voice.channel.connect()
 
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
         assert isinstance(interaction.guild.voice_client.source, discord.PCMVolumeTransformer)
