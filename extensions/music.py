@@ -35,17 +35,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get("url")
 
     @classmethod
-    async def from_query(cls, query: str, *,
-                         loop: Optional[AbstractEventLoop] = None, stream: bool = False) -> "YTDLSource":
+    async def from_query(cls, query: str, *, loop: Optional[AbstractEventLoop] = None) -> "YTDLSource":
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=not stream))
+        data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
 
         assert isinstance(data, dict)
         if "entries" in data:
             data = data["entries"][0]
 
-        filename = data["url"] if stream else cls.ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, options="-vn"), data=data)
+        return cls(discord.FFmpegPCMAudio(data["url"], options="-vn"), data=data)
 
 
 class Music(commands.Cog):
