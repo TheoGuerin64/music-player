@@ -86,6 +86,27 @@ class Music(commands.Cog):
     @app_commands.command()
     @app_commands.describe()
     @app_commands.guild_only()
+    async def volume(self, interaction: Interaction, volume: int) -> None:
+        """Change the player volume.
+
+        Args:
+            volume: Volume to set.
+        """
+        if volume < 0 or volume > 100:
+            raise app_commands.AppCommandError("Volume must be between 0 and 100.")
+        if interaction.guild is None:
+            raise app_commands.AppCommandError("This command must be used in a guild.")
+        if interaction.guild.voice_client is None:
+            raise app_commands.AppCommandError("Not connected to a voice channel.")
+
+        assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
+        assert isinstance(interaction.guild.voice_client.source, discord.PCMVolumeTransformer)
+        interaction.guild.voice_client.source.volume = volume / 100
+        await interaction.response.send_message(f"Changed volume to {volume}%", ephemeral=True)
+
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.guild_only()
     async def play(self, interaction: Interaction, query: str) -> None:
         """Plays from a url
 
