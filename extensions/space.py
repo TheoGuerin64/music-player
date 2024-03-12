@@ -9,6 +9,7 @@ import discord
 from discord import Interaction, app_commands
 from discord.ext import commands
 
+from error import CommandError
 from settings import NASA_API_KEY
 
 APOD_URL = Template("https://api.nasa.gov/planetary/apod?api_key=$api_key")
@@ -37,7 +38,7 @@ async def rover_date_arg(name: str, date: Optional[str]) -> str:
         try:
             datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
-            raise app_commands.AppCommandError("Invalid date format. (format: YYYY-MM-DD)")
+            raise CommandError("Invalid date format. (format: YYYY-MM-DD)", True)
         return "earth_date=" + date
 
 
@@ -87,7 +88,7 @@ class Space(commands.Cog):
                 data = await response.json()
 
         if not data["photos"]:
-            raise app_commands.AppCommandError("No pictures found, try again.")
+            raise CommandError("No pictures found, try again.", True)
         photo = random.choice(data["photos"])
 
         embed = discord.Embed(timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d"))

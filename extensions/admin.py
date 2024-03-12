@@ -5,6 +5,7 @@ from discord import Interaction, app_commands
 from discord.ext import commands
 
 from db import db
+from error import CommandError
 
 
 class Admin(commands.Cog):
@@ -32,7 +33,7 @@ class Admin(commands.Cog):
             number: The number of messages to delete.
         """
         if interaction.channel is None or not hasattr(interaction.channel, "purge"):
-            raise app_commands.AppCommandError("This command can not be used here.")
+            raise CommandError("This command can not be used here.", True)
 
         await interaction.response.defer(thinking=True, ephemeral=True)
         deleted = await interaction.channel.purge(limit=number, reason="Clear command.")  # type: ignore
@@ -49,7 +50,7 @@ class Admin(commands.Cog):
             channel: The welcome channel.
         """
         if interaction.guild is None:
-            raise app_commands.AppCommandError("This command can not be used here.")
+            raise CommandError("This command can not be used here.", True)
 
         if channel is None:
             db.set_welcome_channel_id(interaction.guild.id, None)

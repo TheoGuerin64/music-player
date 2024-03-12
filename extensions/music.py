@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from asyncio import AbstractEventLoop
 from typing import Optional
 
@@ -6,6 +7,8 @@ import discord
 import youtube_dl
 from discord import Interaction, app_commands
 from discord.ext import commands
+
+from error import CommandError
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
@@ -22,6 +25,8 @@ YTDL_FORMAT_OPTIONS = {
     "default_search": "auto",
     "source_address": "0.0.0.0",
 }
+
+logger = logging.getLogger(__name__)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
@@ -63,7 +68,7 @@ class Music(commands.Cog):
         if not channel:
             assert isinstance(interaction.user, discord.Member)
             if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
-                raise app_commands.AppCommandError("You are not connected to a voice channel.")
+                raise CommandError("You are not connected to a voice channel.", True)
             channel = interaction.user.voice.channel
 
         await interaction.response.defer(ephemeral=True)
@@ -76,7 +81,7 @@ class Music(commands.Cog):
         """Stop the music and leave the voice channel."""
         assert interaction.guild is not None
         if interaction.guild.voice_client is None:
-            raise app_commands.AppCommandError("Not connected to a voice channel.")
+            raise CommandError("Bot is not connected to a voice channel.", True)
 
         await interaction.guild.voice_client.disconnect(force=True)
         await interaction.response.send_message("Disconnected", ephemeral=True)
@@ -91,10 +96,10 @@ class Music(commands.Cog):
             volume: Volume to set.
         """
         if volume < 0 or volume > 100:
-            raise app_commands.AppCommandError("Volume must be between 0 and 100.")
+            raise CommandError("Volume must be between 0 and 100.", True)
         assert interaction.guild is not None
         if interaction.guild.voice_client is None:
-            raise app_commands.AppCommandError("Not connected to a voice channel.")
+            raise CommandError("Bot is not connected to a voice channel.", True)
 
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
         assert isinstance(interaction.guild.voice_client.source, discord.PCMVolumeTransformer)
@@ -116,12 +121,12 @@ class Music(commands.Cog):
         if not isinstance(interaction.guild.voice_client, discord.VoiceClient):
             assert isinstance(interaction.user, discord.Member)
             if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
-                raise app_commands.AppCommandError("You are not connected to a voice channel.")
+                raise CommandError("You are not connected to a voice channel.", True)
             await interaction.user.voice.channel.connect(timeout=10)
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
 
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
-        interaction.guild.voice_client.play(player, after=lambda e: print(f"Player error: {e}") if e else None)
+        interaction.guild.voice_client.play(player, after=lambda e: logger.error(f"Player error: {e}") if e else None)
 
         await interaction.followup.send(f"Now playing: {player.title}", ephemeral=True)
 
