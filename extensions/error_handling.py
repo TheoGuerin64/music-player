@@ -15,7 +15,6 @@ async def on_error(interaction: Interaction, error: app_commands.AppCommandError
         send = interaction.response.send_message
     if isinstance(error, app_commands.errors.CommandInvokeError) and isinstance(error.original, CommandError):
         await send(error.original.message, ephemeral=error.original.ephemeral)
-        logger.error(error.original)
     else:
         await send("An error occurred.")
         logger.error(error, exc_info=True)
