@@ -1,7 +1,7 @@
 services:
   bot:
     container_name: bot
-    image: bot
+    image: theoguerin/my_discord_bot
     build: .
     env_file:
       - ./.env
