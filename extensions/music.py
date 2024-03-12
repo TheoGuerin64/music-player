@@ -66,8 +66,9 @@ class Music(commands.Cog):
                 raise app_commands.AppCommandError("You are not connected to a voice channel.")
             channel = interaction.user.voice.channel
 
+        await interaction.response.defer(ephemeral=True)
         await channel.connect(timeout=10)
-        await interaction.response.send_message(f"Joined {channel.name}", ephemeral=True)
+        await interaction.followup.send(f"Joined {channel.name}", ephemeral=True)
 
     @app_commands.command()
     @app_commands.guild_only()
