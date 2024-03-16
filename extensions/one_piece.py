@@ -20,7 +20,7 @@ class OnePiece(commands.Cog):
 
         self.check_chapter.start()
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(hours=1)
     async def check_chapter(self) -> None:
         chapter = db.get_one_piece_chapter()
         if chapter is None:
