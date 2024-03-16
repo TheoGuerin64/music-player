@@ -59,6 +59,26 @@ class Admin(commands.Cog):
             db.set_welcome_channel_id(interaction.guild.id, channel.id)
             await interaction.response.send_message(f"Welcome channel set to {channel.mention}.", ephemeral=True)
 
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
+    async def set_one_piece_channel(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+        """Set the One Piece channel.
+
+        Args:
+            channel: The One Piece channel.
+        """
+        if interaction.guild is None:
+            raise CommandError("This command can not be used here.", True)
+
+        if channel is None:
+            db.set_one_piece_channel_id(interaction.guild.id, None)
+            await interaction.response.send_message("One Piece channel removed.", ephemeral=True)
+        else:
+            db.set_one_piece_channel_id(interaction.guild.id, channel.id)
+            await interaction.response.send_message(f"One Piece channel set to {channel.mention}.", ephemeral=True)
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Admin(bot))
