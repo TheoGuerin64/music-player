@@ -83,6 +83,30 @@ class Admin(commands.Cog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
+    async def set_role_message(self, interaction: Interaction, message_id: str) -> None:
+        """Set the role message.
+
+        Args:
+            message_id: The message id.
+        """
+        if interaction.guild is None:
+            raise CommandError("This command can not be used here.", True)
+
+        if len(message_id) > 20:
+            raise CommandError("Invalid message id.", True)
+        try:
+            message_id_int = int(message_id)
+        except ValueError:
+            raise CommandError("Invalid message id.", True)
+
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        db.set_role_message_id(interaction.guild.id, message_id_int)
+        await interaction.followup.send("Role message set.")
+
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
     async def write(self, interaction: Interaction, message: str, channel: Optional[discord.TextChannel]) -> None:
         """Write a message in a channel.
 
