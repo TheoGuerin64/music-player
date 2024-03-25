@@ -39,7 +39,13 @@ class OnePiece(commands.Cog):
                 logger.error("Invalid channel.")
                 continue
 
-            await channel.send(f"Chapter {new_chapter} is out! {SCAN_LINK.substitute(chapter=new_chapter)}")
+            message = f"Chapter {new_chapter} is out! {SCAN_LINK.substitute(chapter=new_chapter)}"
+
+            role = discord.utils.get(channel.guild.roles, name="One Piece chapter")
+            if role is not None:
+                message = f"{role.mention} {message}"
+
+            await channel.send(message)
 
         db.set_one_piece_chapter(new_chapter)
 
@@ -48,7 +54,7 @@ class OnePiece(commands.Cog):
         await self.bot.wait_until_ready()
         chapter = db.get_one_piece_chapter()
         if chapter is None:
-            db.set_one_piece_chapter(1110)
+            db.set_one_piece_chapter(1111)
 
 
 async def setup(bot: commands.Bot) -> None:
