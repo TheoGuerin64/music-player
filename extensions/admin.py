@@ -1,11 +1,72 @@
 from typing import Optional
 
 import discord
-from discord import Interaction, app_commands
+from discord import Interaction, app_commands, ui
 from discord.ext import commands
 
 from db import db
 from error import CommandError
+
+
+class EmbedModal(ui.Modal, title="Embed Generator"):
+    title_input = ui.TextInput(
+        label="Title",
+        max_length=256
+    )
+    description_input = ui.TextInput(
+        label="Description",
+        max_length=4000,
+        style=discord.TextStyle.long
+    )
+    image_url_input = ui.TextInput(
+        required=False,
+        label="Image URL",
+        max_length=2048
+    )
+    color_input = ui.TextInput(
+        required=False,
+        label="Color",
+        min_length=7,
+        max_length=7,
+        placeholder="#rrggbb"
+    )
+
+    def __init__(self, channel: discord.TextChannel) -> None:
+        super().__init__()
+        self.channel = channel
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if not self.color_input.value:
+            return True
+
+        if self.color_input.value[0] != "#":
+            return False
+        try:
+            int(self.color_input.value[1:], 16)
+        except ValueError:
+            return False
+        return True
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        if self.color_input.value:
+            color = int(self.color_input.value[1:], 16)
+        else:
+            color = discord.Color.default()
+
+        embed = discord.Embed(
+            title=self.title_input.value,
+            description=self.description_input.value,
+            color=color
+        )
+        if self.image_url_input.value:
+            embed.set_image(url=self.image_url_input.value)
+        await self.channel.send(embed=embed)
+
+        await interaction.response.send_message("Embed sent.", ephemeral=True)
+
+    async def on_error(self, interaction: Interaction, error: Exception) -> None:
+        await interaction.response.send_message(str(error), ephemeral=True)
+        return await super().on_error(interaction, error)
 
 
 class Admin(commands.Cog):
@@ -116,15 +177,35 @@ class Admin(commands.Cog):
         """
         if interaction.guild is None:
             raise CommandError("This command can not be used here.", True)
-        if not isinstance(interaction.channel, discord.TextChannel):
-            raise CommandError("This command can not be used here.", True)
 
         if not channel:
+            if not isinstance(interaction.channel, discord.TextChannel):
+                raise CommandError("This command can not be used here.", True)
             channel = interaction.channel
 
         await interaction.response.defer(thinking=True, ephemeral=True)
         await channel.send(message)
         await interaction.followup.send("Message sent.")
+
+    @app_commands.command(name="embed")
+    @app_commands.describe()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
+    async def embed_(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+        """Write an embed message in a channel.
+
+        Args:
+            channel: The channel.
+        """
+        if interaction.guild is None:
+            raise CommandError("This command can not be used here.", True)
+
+        if not channel:
+            if not isinstance(interaction.channel, discord.TextChannel):
+                raise CommandError("This command can not be used here.", True)
+            channel = interaction.channel
+
+        await interaction.response.send_modal(EmbedModal(channel))
 
     @app_commands.command()
     @app_commands.describe()
