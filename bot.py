@@ -19,7 +19,7 @@ class MyBot(commands.Bot):
             command_prefix=(),
             activity=discord.Activity(
                 type=discord.ActivityType.playing,
-                name="/help"
+                name="/play"
             )
         )
 
