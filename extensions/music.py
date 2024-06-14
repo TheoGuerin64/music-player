@@ -118,6 +118,9 @@ class Music(commands.Cog):
         if interaction.guild.voice_client is None:
             raise CommandError("Bot is not connected to a voice channel.", True)
 
+        if not self.queues.get(interaction.guild.id):
+            raise CommandError("Queue is empty.", True)
+
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
         interaction.guild.voice_client.stop()
         await interaction.response.send_message("Skipped", ephemeral=True)
