@@ -1,7 +1,7 @@
 import asyncio
-from collections import deque
 import logging
 from asyncio import AbstractEventLoop
+from collections import deque
 from typing import Optional
 
 import discord
@@ -56,7 +56,7 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot = bot
-        self.queues: dict[str, deque[YTDLSource]] = {}
+        self.queues: dict[int, deque[YTDLSource]] = {}
 
     @app_commands.command()
     @app_commands.describe()
@@ -144,12 +144,13 @@ class Music(commands.Cog):
             if error:
                 logger.error(f"Player error: {error}")
 
+            assert isinstance(interaction.guild, discord.Guild)
             if not isinstance(interaction.guild.voice_client, discord.VoiceClient):
                 logger.info("Client is not connected to voice channel.")
                 if self.queues.get(interaction.guild.id):
                     self.queues.pop(interaction.guild.id)
                 return
-            
+
             queue = self.queues.get(interaction.guild.id)
             if queue is None:
                 return
@@ -163,7 +164,7 @@ class Music(commands.Cog):
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
         if self.queues.get(interaction.guild.id) is None:
             self.queues[interaction.guild.id] = deque([player])
-            await play_next_song()
+            play_next_song()
         else:
             self.queues[interaction.guild.id].appendleft(player)
         await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
