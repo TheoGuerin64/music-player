@@ -169,6 +169,21 @@ class Music(commands.Cog):
             self.queues[interaction.guild.id].appendleft(player)
         await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
 
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.guild_only()
+    async def queue(self, interaction: Interaction) -> None:
+        """Shows the current queue."""
+        assert interaction.guild is not None
+        if self.queues.get(interaction.guild.id) is None:
+            raise CommandError("Queue is empty.", True)
+
+        queue = self.queues[interaction.guild.id]
+        embed = discord.Embed(title="Queue", color=discord.Color.blurple())
+        for i, song in enumerate(queue, start=1):
+            embed.add_field(name=f"{i}. {song.title}", value=song.url, inline=False)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Music(bot))
