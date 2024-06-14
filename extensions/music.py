@@ -165,8 +165,11 @@ class Music(commands.Cog):
         if self.queues.get(interaction.guild.id) is None:
             self.queues[interaction.guild.id] = deque([player])
             play_next_song()
-        else:
+        elif len(self.queues[interaction.guild.id]) < 10:
             self.queues[interaction.guild.id].appendleft(player)
+        else:
+            raise CommandError("Queue is full.", True)
+
         await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
 
     @app_commands.command()
