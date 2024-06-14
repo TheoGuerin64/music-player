@@ -188,7 +188,10 @@ class Music(commands.Cog):
         queue = self.queues[interaction.guild.id]
         embed = discord.Embed(title="Queue", color=discord.Color.blurple())
         for i, song in enumerate(queue, start=1):
-            embed.add_field(name=f"{i}. {song.title}", value=song.url, inline=False)
+            try:
+                embed.add_field(name=f"{i}. {song.title}", value=song.url or "Unknown link", inline=False)
+            except Exception as e:
+                raise CommandError(f"Failed to add song to queue: {e}", True)
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
