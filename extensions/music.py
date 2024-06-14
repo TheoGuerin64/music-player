@@ -161,8 +161,9 @@ class Music(commands.Cog):
                 self.queues.pop(interaction.guild.id)
                 return
 
-            next_song = self.queues[interaction.guild.id].pop()
+            next_song = self.queues[interaction.guild.id][-1]
             interaction.guild.voice_client.play(next_song, after=play_next_song)
+            self.queues[interaction.guild.id].pop()
 
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
         if self.queues.get(interaction.guild.id) is None:
