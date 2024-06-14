@@ -1,4 +1,5 @@
 import asyncio
+from collections import deque
 import logging
 from asyncio import AbstractEventLoop
 from typing import Optional
@@ -55,6 +56,7 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot = bot
+        self.queues: dict[str, deque[YTDLSource]] = {}
 
     @app_commands.command()
     @app_commands.describe()
@@ -83,6 +85,7 @@ class Music(commands.Cog):
         if interaction.guild.voice_client is None:
             raise CommandError("Bot is not connected to a voice channel.", True)
 
+        self.queues.pop(interaction.guild.id)
         await interaction.guild.voice_client.disconnect(force=True)
         await interaction.response.send_message("Disconnected", ephemeral=True)
 
@@ -109,6 +112,19 @@ class Music(commands.Cog):
     @app_commands.command()
     @app_commands.describe()
     @app_commands.guild_only()
+    async def skip(self, interaction: Interaction) -> None:
+        """Skip the current song."""
+        assert interaction.guild is not None
+        if interaction.guild.voice_client is None:
+            raise CommandError("Bot is not connected to a voice channel.", True)
+
+        assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
+        interaction.guild.voice_client.stop()
+        await interaction.response.send_message("Skipped", ephemeral=True)
+
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.guild_only()
     async def play(self, interaction: Interaction, query: str) -> None:
         """Plays from a url
 
@@ -123,12 +139,35 @@ class Music(commands.Cog):
             if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
                 raise CommandError("You are not connected to a voice channel.", True)
             await interaction.user.voice.channel.connect(timeout=10)
-        assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
+
+        def play_next_song(error: Optional[Exception] = None) -> None:
+            if error:
+                logger.error(f"Player error: {error}")
+
+            if not isinstance(interaction.guild.voice_client, discord.VoiceClient):
+                logger.info("Client is not connected to voice channel.")
+                if self.queues.get(interaction.guild.id):
+                    self.queues.pop(interaction.guild.id)
+                return
+            
+            queue = self.queues.get(interaction.guild.id)
+            if queue is None:
+                return
+            if not queue:
+                self.queues.pop(interaction.guild.id)
+                return
+
+            next_song = self.queues[interaction.guild.id].pop()
+            interaction.guild.voice_client.play(next_song, after=play_next_song)
 
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
-        interaction.guild.voice_client.play(player, after=lambda e: logger.error(f"Player error: {e}") if e else None)
+        if self.queues.get(interaction.guild.id) is None:
+            self.queues[interaction.guild.id] = deque([player])
+            await play_next_song()
+        else:
+            self.queues[interaction.guild.id].appendleft(player)
+        await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
 
-        await interaction.followup.send(f"Now playing: {player.title}", ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:
