@@ -170,6 +170,5 @@ class Music(commands.Cog):
         await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
 
 
-
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Music(bot))
