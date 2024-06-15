@@ -189,7 +189,7 @@ class Music(commands.Cog):
         queue = self.queues[interaction.guild.id]
         embed = discord.Embed(title="Queue", color=discord.Color.blurple())
 
-        for i, song in enumerate(queue, start=1):
+        for i, song in enumerate(reversed(queue), start=1):
             name = f"{i}. {song.title or 'Unknown Title'}"
             if len(name) > 255:
                 name = name[:252] + "..."
