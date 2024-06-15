@@ -56,6 +56,7 @@ class Music(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         super().__init__()
         self.bot = bot
+        self.current_song: dict[int, YTDLSource] = {}
         self.queues: dict[int, deque[YTDLSource]] = {}
 
     @app_commands.command()
@@ -161,9 +162,9 @@ class Music(commands.Cog):
                 self.queues.pop(interaction.guild.id)
                 return
 
-            next_song = self.queues[interaction.guild.id][-1]
+            next_song = self.queues[interaction.guild.id].pop()
             interaction.guild.voice_client.play(next_song, after=play_next_song)
-            self.queues[interaction.guild.id].pop()
+            self.current_song[interaction.guild.id] = next_song
 
         player = await YTDLSource.from_query(query, loop=self.bot.loop)
         if self.queues.get(interaction.guild.id) is None:
@@ -187,12 +188,27 @@ class Music(commands.Cog):
 
         queue = self.queues[interaction.guild.id]
         embed = discord.Embed(title="Queue", color=discord.Color.blurple())
+
         for i, song in enumerate(queue, start=1):
-            try:
-                embed.add_field(name=f"{i}. {song.title}", value=song.url or "Unknown link", inline=False)
-            except Exception as e:
-                raise CommandError(f"Failed to add song to queue: {e}", True)
+            name = f"{i}. {song.title or 'Unknown Title'}"
+            if len(name) > 255:
+                name = name[:252] + "..."
+
+            embed.add_field(name=name, value="", inline=False)
+
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command()
+    @app_commands.describe()
+    @app_commands.guild_only()
+    async def current(self, interaction: Interaction) -> None:
+        """Shows the current song."""
+        assert interaction.guild is not None
+        song = self.current_song.get(interaction.guild.id)
+        if song is None:
+            raise CommandError("No song is currently playing.", True)
+
+        await interaction.response.send_message(f"Currently playing: {song.title}", ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:
