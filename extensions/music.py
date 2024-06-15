@@ -86,7 +86,7 @@ class Music(commands.Cog):
         if interaction.guild.voice_client is None:
             raise CommandError("Bot is not connected to a voice channel.", True)
 
-        self.queues.pop(interaction.guild.id)
+        self.queues.pop(interaction.guild.id, None)
         await interaction.guild.voice_client.disconnect(force=True)
         await interaction.response.send_message("Disconnected", ephemeral=True)
 
