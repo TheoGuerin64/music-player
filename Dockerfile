@@ -23,8 +23,8 @@ COPY . /app/
 
 FROM base AS dev
 
-CMD ["python3.12", "bot.py"]
+CMD ["python3.12", "-m", "my_discord_bot"]
 
 FROM base AS prod
 
-CMD ["python3.12", "-OO", "bot.py"]
+CMD ["python3.12", "-OO", "-m", "my_discord_bot"]

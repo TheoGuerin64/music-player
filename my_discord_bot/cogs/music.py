@@ -9,7 +9,8 @@ import youtube_dl
 from discord import Interaction, app_commands
 from discord.ext import commands
 
-from error import CommandError
+from ..exceptions import CommandError
+from .bot_cog import BotCog
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
@@ -41,9 +42,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get("url")
 
     @classmethod
-    async def from_query(cls, query: str, *, loop: Optional[AbstractEventLoop] = None) -> "YTDLSource":
+    async def from_query(
+        cls, query: str, *, loop: Optional[AbstractEventLoop] = None
+    ) -> "YTDLSource":
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
+        data = await loop.run_in_executor(
+            None, lambda: cls.ytdl.extract_info(query, download=False)
+        )
 
         assert isinstance(data, dict)
         if "entries" in data:
@@ -52,17 +57,18 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(data["url"], options="-vn"), data=data)
 
 
-class Music(commands.Cog):
+class Music(BotCog):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-        self.bot = bot
+        super().__init__(bot)
         self.current_song: dict[int, YTDLSource] = {}
         self.queues: dict[int, deque[YTDLSource]] = {}
 
     @app_commands.command()
     @app_commands.describe()
     @app_commands.guild_only()
-    async def join(self, interaction: Interaction, channel: Optional[discord.VoiceChannel]) -> None:
+    async def join(
+        self, interaction: Interaction, channel: Optional[discord.VoiceChannel]
+    ) -> None:
         """Join the voice channel.
 
         Args:
@@ -70,7 +76,9 @@ class Music(commands.Cog):
         """
         if not channel:
             assert isinstance(interaction.user, discord.Member)
-            if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
+            if interaction.user.voice is None or not isinstance(
+                interaction.user.voice.channel, discord.VoiceChannel
+            ):
                 raise CommandError("You are not connected to a voice channel.", True)
             channel = interaction.user.voice.channel
 
@@ -106,9 +114,13 @@ class Music(commands.Cog):
             raise CommandError("Bot is not connected to a voice channel.", True)
 
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
-        assert isinstance(interaction.guild.voice_client.source, discord.PCMVolumeTransformer)
+        assert isinstance(
+            interaction.guild.voice_client.source, discord.PCMVolumeTransformer
+        )
         interaction.guild.voice_client.source.volume = volume / 100
-        await interaction.response.send_message(f"Changed volume to {volume}%", ephemeral=True)
+        await interaction.response.send_message(
+            f"Changed volume to {volume}%", ephemeral=True
+        )
 
     @app_commands.command()
     @app_commands.describe()
@@ -140,7 +152,9 @@ class Music(commands.Cog):
         assert isinstance(interaction.guild, discord.Guild)
         if not isinstance(interaction.guild.voice_client, discord.VoiceClient):
             assert isinstance(interaction.user, discord.Member)
-            if interaction.user.voice is None or not isinstance(interaction.user.voice.channel, discord.VoiceChannel):
+            if interaction.user.voice is None or not isinstance(
+                interaction.user.voice.channel, discord.VoiceChannel
+            ):
                 raise CommandError("You are not connected to a voice channel.", True)
             await interaction.user.voice.channel.connect(timeout=10)
 
@@ -175,7 +189,9 @@ class Music(commands.Cog):
         else:
             raise CommandError("Queue is full.", True)
 
-        await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
+        await interaction.followup.send(
+            f"Added to queue: {player.title}", ephemeral=True
+        )
 
     @app_commands.command()
     @app_commands.describe()
@@ -208,8 +224,6 @@ class Music(commands.Cog):
         if song is None:
             raise CommandError("No song is currently playing.", True)
 
-        await interaction.response.send_message(f"Currently playing: {song.title}", ephemeral=True)
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Music(bot))
+        await interaction.response.send_message(
+            f"Currently playing: {song.title}", ephemeral=True
+        )

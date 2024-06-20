@@ -6,17 +6,17 @@ import aiohttp
 import discord
 from discord import Interaction, app_commands
 from discord.app_commands import Choice
-from discord.ext import commands
 
-URL_TEMPLATE = Template("https://the-trivia-api.com/api/questions?limit=1&difficulty=$difficulty&categories=$category")
+from .bot_cog import BotCog
+
+URL_TEMPLATE = Template(
+    "https://the-trivia-api.com/api/questions?limit=1&difficulty=$difficulty&categories=$category"
+)
 
 
 class Retry(discord.ui.Button):
     def __init__(self):
-        super().__init__(
-            label="Retry",
-            style=discord.ButtonStyle.blurple
-        )
+        super().__init__(label="Retry", style=discord.ButtonStyle.blurple)
 
     async def callback(self, interaction: Interaction):
         assert isinstance(self.view, TriviaView)
@@ -48,12 +48,18 @@ class TriviaView(discord.ui.View):
             if not isinstance(child, Answer):
                 continue
             if child.is_correct or child is button:
-                child.style = discord.ButtonStyle.green if child.is_correct else discord.ButtonStyle.red
+                child.style = (
+                    discord.ButtonStyle.green
+                    if child.is_correct
+                    else discord.ButtonStyle.red
+                )
             child.disabled = True
         await interaction.response.edit_message(view=self)
 
     async def request_trivia(self) -> dict:
-        url = URL_TEMPLATE.substitute(difficulty=self.difficulty, category=self.category)
+        url = URL_TEMPLATE.substitute(
+            difficulty=self.difficulty, category=self.category
+        )
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 return (await response.json())[0]
@@ -85,17 +91,14 @@ class TriviaView(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=self)
 
 
-class Trivia(commands.Cog):
-    def __init__(self) -> None:
-        super().__init__()
-
+class Trivia(BotCog):
     @app_commands.command()
     @app_commands.describe()
     @app_commands.choices(
         difficulty=[
             Choice(name="Easy", value="easy"),
             Choice(name="Medium", value="medium"),
-            Choice(name="Hard", value="hard")
+            Choice(name="Hard", value="hard"),
         ],
         category=[
             Choice(name="Arts and Literature", value="arts_and_literature"),
@@ -107,11 +110,15 @@ class Trivia(commands.Cog):
             Choice(name="Music", value="music"),
             Choice(name="Science", value="science"),
             Choice(name="Society and Culture", value="society_and_culture"),
-            Choice(name="Sport and Leisure", value="sport_and_leisure")
-        ]
+            Choice(name="Sport and Leisure", value="sport_and_leisure"),
+        ],
     )
-    async def trivia(self, interaction: Interaction,
-                     difficulty: Optional[Choice[str]], category: Optional[Choice[str]]) -> None:
+    async def trivia(
+        self,
+        interaction: Interaction,
+        difficulty: Optional[Choice[str]],
+        category: Optional[Choice[str]],
+    ) -> None:
         """Start a trivia.
 
         Args:
@@ -120,9 +127,5 @@ class Trivia(commands.Cog):
         """
         await TriviaView(
             difficulty.value if difficulty is not None else "",
-            category.value if category is not None else ""
+            category.value if category is not None else "",
         ).start(interaction)
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Trivia())

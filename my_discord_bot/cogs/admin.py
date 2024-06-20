@@ -2,33 +2,20 @@ from typing import Optional
 
 import discord
 from discord import Interaction, app_commands, ui
-from discord.ext import commands
 
-from db import db
-from error import CommandError
+from ..db import db
+from ..exceptions import CommandError
+from .bot_cog import BotCog
 
 
 class EmbedModal(ui.Modal, title="Embed Generator"):
-    title_input = ui.TextInput(
-        label="Title",
-        max_length=256
-    )
+    title_input = ui.TextInput(label="Title", max_length=256)
     description_input = ui.TextInput(
-        label="Description",
-        max_length=4000,
-        style=discord.TextStyle.long
+        label="Description", max_length=4000, style=discord.TextStyle.long
     )
-    image_url_input = ui.TextInput(
-        required=False,
-        label="Image URL",
-        max_length=2048
-    )
+    image_url_input = ui.TextInput(required=False, label="Image URL", max_length=2048)
     color_input = ui.TextInput(
-        required=False,
-        label="Color",
-        min_length=7,
-        max_length=7,
-        placeholder="#rrggbb"
+        required=False, label="Color", min_length=7, max_length=7, placeholder="#rrggbb"
     )
 
     def __init__(self, channel: discord.TextChannel) -> None:
@@ -56,7 +43,7 @@ class EmbedModal(ui.Modal, title="Embed Generator"):
         embed = discord.Embed(
             title=self.title_input.value,
             description=self.description_input.value,
-            color=color
+            color=color,
         )
         if self.image_url_input.value:
             embed.set_image(url=self.image_url_input.value)
@@ -69,11 +56,7 @@ class EmbedModal(ui.Modal, title="Embed Generator"):
         return await super().on_error(interaction, error)
 
 
-class Admin(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-        self.bot = bot
-
+class Admin(BotCog):
     @app_commands.command()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
@@ -104,7 +87,9 @@ class Admin(commands.Cog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def set_welcome_channel(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+    async def set_welcome_channel(
+        self, interaction: Interaction, channel: Optional[discord.TextChannel]
+    ) -> None:
         """Set the welcome channel.
 
         Args:
@@ -115,16 +100,22 @@ class Admin(commands.Cog):
 
         if channel is None:
             db.set_welcome_channel_id(interaction.guild.id, None)
-            await interaction.response.send_message("Welcome channel removed.", ephemeral=True)
+            await interaction.response.send_message(
+                "Welcome channel removed.", ephemeral=True
+            )
         else:
             db.set_welcome_channel_id(interaction.guild.id, channel.id)
-            await interaction.response.send_message(f"Welcome channel set to {channel.mention}.", ephemeral=True)
+            await interaction.response.send_message(
+                f"Welcome channel set to {channel.mention}.", ephemeral=True
+            )
 
     @app_commands.command()
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def set_one_piece_channel(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+    async def set_one_piece_channel(
+        self, interaction: Interaction, channel: Optional[discord.TextChannel]
+    ) -> None:
         """Set the One Piece channel.
 
         Args:
@@ -135,10 +126,14 @@ class Admin(commands.Cog):
 
         if channel is None:
             db.set_one_piece_channel_id(interaction.guild.id, None)
-            await interaction.response.send_message("One Piece channel removed.", ephemeral=True)
+            await interaction.response.send_message(
+                "One Piece channel removed.", ephemeral=True
+            )
         else:
             db.set_one_piece_channel_id(interaction.guild.id, channel.id)
-            await interaction.response.send_message(f"One Piece channel set to {channel.mention}.", ephemeral=True)
+            await interaction.response.send_message(
+                f"One Piece channel set to {channel.mention}.", ephemeral=True
+            )
 
     @app_commands.command()
     @app_commands.describe()
@@ -168,7 +163,12 @@ class Admin(commands.Cog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def write(self, interaction: Interaction, message: str, channel: Optional[discord.TextChannel]) -> None:
+    async def write(
+        self,
+        interaction: Interaction,
+        message: str,
+        channel: Optional[discord.TextChannel],
+    ) -> None:
         """Write a message in a channel.
 
         Args:
@@ -191,7 +191,9 @@ class Admin(commands.Cog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def embed_(self, interaction: Interaction, channel: Optional[discord.TextChannel]) -> None:
+    async def embed_(
+        self, interaction: Interaction, channel: Optional[discord.TextChannel]
+    ) -> None:
         """Write an embed message in a channel.
 
         Args:
@@ -211,7 +213,9 @@ class Admin(commands.Cog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def add_reaction(self, interaction: Interaction, message_id: str, emoji: str) -> None:
+    async def add_reaction(
+        self, interaction: Interaction, message_id: str, emoji: str
+    ) -> None:
         """Add a reaction to a message.
 
         Args:
@@ -240,7 +244,3 @@ class Admin(commands.Cog):
         except (discord.HTTPException, discord.NotFound, TypeError):
             raise CommandError("Invalid emoji.", True)
         await interaction.followup.send("Reaction added.", ephemeral=True)
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Admin(bot))

@@ -7,16 +7,22 @@ from typing import Optional
 import aiohttp
 import discord
 from discord import Interaction, app_commands
-from discord.ext import commands
 
-from error import CommandError
-from settings import NASA_API_KEY
+from ..exceptions import CommandError
+from ..settings import NASA_API_KEY
+from .bot_cog import BotCog
 
 APOD_URL = Template("https://api.nasa.gov/planetary/apod?api_key=$api_key")
-ROVER_DATA_URL = Template("https://api.nasa.gov/mars-photos/api/v1/rovers/$name?api_key=$api_key")
-ROVER_PHOTOS_URL = Template("https://api.nasa.gov/mars-photos/api/v1/rovers/$name/photos?$date_arg&api_key=$api_key")
+ROVER_DATA_URL = Template(
+    "https://api.nasa.gov/mars-photos/api/v1/rovers/$name?api_key=$api_key"
+)
+ROVER_PHOTOS_URL = Template(
+    "https://api.nasa.gov/mars-photos/api/v1/rovers/$name/photos?$date_arg&api_key=$api_key"
+)
 EARTH_URL = Template("https://api.nasa.gov/EPIC/api/natural?api_key=$api_key")
-EARTH_IMAGE_URL = Template("https://epic.gsfc.nasa.gov/archive/natural/$year/$month/$day/png/$image.png")
+EARTH_IMAGE_URL = Template(
+    "https://epic.gsfc.nasa.gov/archive/natural/$year/$month/$day/png/$image.png"
+)
 
 
 class Rovers(Enum):
@@ -42,10 +48,7 @@ async def rover_date_arg(name: str, date: Optional[str]) -> str:
         return "earth_date=" + date
 
 
-class Space(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-
+class Space(BotCog):
     @app_commands.command()
     @app_commands.guild_only()
     async def apod(self, interaction: Interaction) -> None:
@@ -57,10 +60,7 @@ class Space(commands.Cog):
             async with session.get(url) as response:
                 data: dict = await response.json()
 
-        embed = discord.Embed(
-            title=data["title"],
-            description=data["explanation"]
-        )
+        embed = discord.Embed(title=data["title"], description=data["explanation"])
         if "copyright" in data.keys():
             embed.set_author(name=data["copyright"])
         embed.set_image(url=data["hdurl"])
@@ -70,7 +70,9 @@ class Space(commands.Cog):
     @app_commands.command()
     @app_commands.describe()
     @app_commands.guild_only()
-    async def rover(self, interaction: Interaction, name: Optional[Rovers], date: Optional[str]) -> None:
+    async def rover(
+        self, interaction: Interaction, name: Optional[Rovers], date: Optional[str]
+    ) -> None:
         """Random picture of Mars rover.
 
         Args:
@@ -82,7 +84,9 @@ class Space(commands.Cog):
         rover_name = name.value if name else random.choice(list(Rovers)).value
         date_arg = await rover_date_arg(rover_name, date)
 
-        url = ROVER_PHOTOS_URL.substitute(name=rover_name, date_arg=date_arg, api_key=NASA_API_KEY)
+        url = ROVER_PHOTOS_URL.substitute(
+            name=rover_name, date_arg=date_arg, api_key=NASA_API_KEY
+        )
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 data = await response.json()
@@ -91,7 +95,9 @@ class Space(commands.Cog):
             raise CommandError("No pictures found, try again.", True)
         photo = random.choice(data["photos"])
 
-        embed = discord.Embed(timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d"))
+        embed = discord.Embed(
+            timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d")
+        )
         embed.set_author(name=photo["rover"]["name"])
         embed.set_image(url=photo["img_src"])
         await interaction.followup.send(embed=embed)
@@ -113,9 +119,9 @@ class Space(commands.Cog):
         day = str(date.day).zfill(2)
 
         embed = discord.Embed(timestamp=date)
-        embed.set_image(url=EARTH_IMAGE_URL.substitute(year=date.year, month=month, day=day, image=photo["image"]))
+        embed.set_image(
+            url=EARTH_IMAGE_URL.substitute(
+                year=date.year, month=month, day=day, image=photo["image"]
+            )
+        )
         await interaction.followup.send(embed=embed)
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Space(bot))

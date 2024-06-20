@@ -5,7 +5,8 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from db import db
+from ..db import db
+from .bot_cog import BotCog
 
 TEST_LINK = Template("https://lelscans.net/mangas/one-piece/$chapter/00.jpg")
 SCAN_LINK = Template("https://lelscans.net/scan-one-piece/$chapter")
@@ -13,11 +14,9 @@ SCAN_LINK = Template("https://lelscans.net/scan-one-piece/$chapter")
 logger = logging.getLogger(__name__)
 
 
-class OnePiece(commands.Cog):
+class OnePiece(BotCog):
     def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-        self.bot = bot
-
+        super().__init__(bot)
         self.check_chapter.start()
 
     @tasks.loop(hours=1)
@@ -29,7 +28,9 @@ class OnePiece(commands.Cog):
 
         new_chapter = chapter + 1
         async with aiohttp.ClientSession() as session:
-            async with session.get(TEST_LINK.substitute(chapter=new_chapter)) as response:
+            async with session.get(
+                TEST_LINK.substitute(chapter=new_chapter)
+            ) as response:
                 if response.status != 200:
                     return
 
@@ -55,7 +56,3 @@ class OnePiece(commands.Cog):
         chapter = db.get_one_piece_chapter()
         if chapter is None:
             db.set_one_piece_chapter(1111)
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(OnePiece(bot))

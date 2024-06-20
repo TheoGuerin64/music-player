@@ -3,7 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from db import db
+from ..db import db
+from .bot_cog import BotCog
 
 logger = logging.getLogger(__name__)
 
@@ -12,11 +13,7 @@ class InvalidPayload(Exception):
     pass
 
 
-class Events(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
-        super().__init__()
-        self.bot = bot
-
+class Events(BotCog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         channel_id = db.get_welcome_channel_id(member.guild.id)
@@ -25,15 +22,21 @@ class Events(commands.Cog):
 
         channel = member.guild.get_channel(channel_id)
         if channel is None:
-            logger.error(f"Welcome channel {channel_id} not found in guild {member.guild.id}.")
+            logger.error(
+                f"Welcome channel {channel_id} not found in guild {member.guild.id}."
+            )
             return
         if not isinstance(channel, discord.TextChannel):
-            logger.error(f"Invalid welcome channel {channel_id} in guild {member.guild.id}.")
+            logger.error(
+                f"Invalid welcome channel {channel_id} in guild {member.guild.id}."
+            )
             return
 
         await channel.send(f"Bienvenue {member.mention}, lis les règles et amuse toi !")
 
-    def get_role_member(self, payload: discord.RawReactionActionEvent) -> tuple[discord.Role, discord.Member]:
+    def get_role_member(
+        self, payload: discord.RawReactionActionEvent
+    ) -> tuple[discord.Role, discord.Member]:
         if not payload.guild_id:
             raise ValueError("Guild ID not found.")
 
@@ -62,7 +65,9 @@ class Events(commands.Cog):
         return role, member
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
+    async def on_raw_reaction_add(
+        self, payload: discord.RawReactionActionEvent
+    ) -> None:
         try:
             role, member = self.get_role_member(payload)
         except InvalidPayload:
@@ -74,7 +79,9 @@ class Events(commands.Cog):
             logger.error(f"Failed to add role: {e}")
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> None:
+    async def on_raw_reaction_remove(
+        self, payload: discord.RawReactionActionEvent
+    ) -> None:
         try:
             role, member = self.get_role_member(payload)
         except InvalidPayload:
@@ -84,7 +91,3 @@ class Events(commands.Cog):
             await member.remove_roles(role)
         except discord.HTTPException as e:
             logger.error(f"Failed to remove role: {e}")
-
-
-async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(Events(bot))
