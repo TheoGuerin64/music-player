@@ -1,7 +1,7 @@
 from typing import Optional
 
 import discord
-from discord import Interaction, app_commands, ui
+from discord import Interaction, TextStyle, app_commands, ui
 
 from ..db import db
 from ..exceptions import CommandError
@@ -10,9 +10,7 @@ from .bot_cog import BotCog
 
 class EmbedModal(ui.Modal, title="Embed Generator"):
     title_input = ui.TextInput(label="Title", max_length=256)
-    description_input = ui.TextInput(
-        label="Description", max_length=4000, style=discord.TextStyle.long
-    )
+    description_input = ui.TextInput(label="Description", max_length=4000, style=TextStyle.long)
     image_url_input = ui.TextInput(required=False, label="Image URL", max_length=2048)
     color_input = ui.TextInput(
         required=False, label="Color", min_length=7, max_length=7, placeholder="#rrggbb"
@@ -22,7 +20,7 @@ class EmbedModal(ui.Modal, title="Embed Generator"):
         super().__init__()
         self.channel = channel
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+    async def interaction_check(self, interaction: Interaction) -> bool:
         if not self.color_input.value:
             return True
 
@@ -34,7 +32,7 @@ class EmbedModal(ui.Modal, title="Embed Generator"):
             return False
         return True
 
-    async def on_submit(self, interaction: discord.Interaction) -> None:
+    async def on_submit(self, interaction: Interaction) -> None:
         if self.color_input.value:
             color = int(self.color_input.value[1:], 16)
         else:
@@ -57,14 +55,17 @@ class EmbedModal(ui.Modal, title="Embed Generator"):
 
 
 class Admin(BotCog):
-    @app_commands.command()
-    @app_commands.default_permissions(administrator=True)
-    @app_commands.guild_only()
-    async def sync(self, interaction: Interaction) -> None:
-        """Sync the bot."""
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        await self.bot.tree.sync()
-        await interaction.followup.send("Synced.")
+    if __debug__:
+
+        @app_commands.command()
+        @app_commands.describe()
+        @app_commands.default_permissions(administrator=True)
+        @app_commands.guild_only()
+        async def sync(self, interaction: Interaction) -> None:
+            """Sync the tree."""
+            await interaction.response.defer(thinking=True, ephemeral=True)
+            await self.bot.tree.sync()
+            await interaction.followup.send("Synced.")
 
     @app_commands.command()
     @app_commands.describe()
@@ -100,9 +101,7 @@ class Admin(BotCog):
 
         if channel is None:
             db.set_welcome_channel_id(interaction.guild.id, None)
-            await interaction.response.send_message(
-                "Welcome channel removed.", ephemeral=True
-            )
+            await interaction.response.send_message("Welcome channel removed.", ephemeral=True)
         else:
             db.set_welcome_channel_id(interaction.guild.id, channel.id)
             await interaction.response.send_message(
@@ -126,9 +125,7 @@ class Admin(BotCog):
 
         if channel is None:
             db.set_one_piece_channel_id(interaction.guild.id, None)
-            await interaction.response.send_message(
-                "One Piece channel removed.", ephemeral=True
-            )
+            await interaction.response.send_message("One Piece channel removed.", ephemeral=True)
         else:
             db.set_one_piece_channel_id(interaction.guild.id, channel.id)
             await interaction.response.send_message(
@@ -213,9 +210,7 @@ class Admin(BotCog):
     @app_commands.describe()
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
-    async def add_reaction(
-        self, interaction: Interaction, message_id: str, emoji: str
-    ) -> None:
+    async def add_reaction(self, interaction: Interaction, message_id: str, emoji: str) -> None:
         """Add a reaction to a message.
 
         Args:

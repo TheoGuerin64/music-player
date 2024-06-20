@@ -1,6 +1,6 @@
 import logging
 
-from discord import Activity, ActivityType, Client, Intents, Interaction
+from discord import Activity, ActivityType, Intents, Interaction
 from discord.app_commands import AppCommandError
 from discord.app_commands.errors import CommandInvokeError
 from discord.ext import commands
@@ -27,12 +27,16 @@ class MyBot(commands.Bot):
                 logger.error(f"Failed to load cog: {e}")
         logger.info("Cogs loaded.")
 
+        if not __debug__:
+            await self.tree.sync()
+            logger.info("Tree synced.")
+
     async def on_ready(self) -> None:
         assert self.user is not None
         logger.info(f"Logged in as {self.user.name}")
 
     @staticmethod
-    async def on_error(interaction: Interaction[Client], error: AppCommandError) -> None:
+    async def on_error(interaction: Interaction, error: AppCommandError) -> None:
         if interaction.response.is_done():
             send = interaction.followup.send
         else:
