@@ -1,7 +1,9 @@
 services:
   bot:
     image: theoguerin/my_discord_bot
-    build: .
+    build:
+      context: .
+      target: dev
     env_file:
       - ./.env
     networks:
