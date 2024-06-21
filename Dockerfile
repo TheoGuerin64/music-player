@@ -27,4 +27,4 @@ CMD ["python3.12", "-m", "my_discord_bot"]
 
 FROM base AS prod
 
-CMD ["python3.12", "-OO", "-m", "my_discord_bot"]
+CMD ["python3.12", "-O", "-m", "my_discord_bot"]
