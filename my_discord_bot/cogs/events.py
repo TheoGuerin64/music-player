@@ -22,14 +22,10 @@ class Events(BotCog):
 
         channel = member.guild.get_channel(channel_id)
         if channel is None:
-            logger.error(
-                f"Welcome channel {channel_id} not found in guild {member.guild.id}."
-            )
+            logger.error(f"Welcome channel {channel_id} not found in guild {member.guild.id}.")
             return
         if not isinstance(channel, discord.TextChannel):
-            logger.error(
-                f"Invalid welcome channel {channel_id} in guild {member.guild.id}."
-            )
+            logger.error(f"Invalid welcome channel {channel_id} in guild {member.guild.id}.")
             return
 
         await channel.send(f"Bienvenue {member.mention}, lis les règles et amuse toi !")
@@ -65,9 +61,7 @@ class Events(BotCog):
         return role, member
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(
-        self, payload: discord.RawReactionActionEvent
-    ) -> None:
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
         try:
             role, member = self.get_role_member(payload)
         except InvalidPayload:
@@ -79,9 +73,7 @@ class Events(BotCog):
             logger.error(f"Failed to add role: {e}")
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(
-        self, payload: discord.RawReactionActionEvent
-    ) -> None:
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> None:
         try:
             role, member = self.get_role_member(payload)
         except InvalidPayload:

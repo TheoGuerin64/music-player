@@ -28,9 +28,7 @@ class OnePiece(BotCog):
 
         new_chapter = chapter + 1
         async with aiohttp.ClientSession() as session:
-            async with session.get(
-                TEST_LINK.substitute(chapter=new_chapter)
-            ) as response:
+            async with session.get(TEST_LINK.substitute(chapter=new_chapter)) as response:
                 if response.status != 200:
                     return
 

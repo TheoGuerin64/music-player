@@ -49,17 +49,13 @@ class TriviaView(discord.ui.View):
                 continue
             if child.is_correct or child is button:
                 child.style = (
-                    discord.ButtonStyle.green
-                    if child.is_correct
-                    else discord.ButtonStyle.red
+                    discord.ButtonStyle.green if child.is_correct else discord.ButtonStyle.red
                 )
             child.disabled = True
         await interaction.response.edit_message(view=self)
 
     async def request_trivia(self) -> dict:
-        url = URL_TEMPLATE.substitute(
-            difficulty=self.difficulty, category=self.category
-        )
+        url = URL_TEMPLATE.substitute(difficulty=self.difficulty, category=self.category)
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 return (await response.json())[0]

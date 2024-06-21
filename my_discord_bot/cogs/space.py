@@ -13,9 +13,7 @@ from ..settings import NASA_API_KEY
 from .bot_cog import BotCog
 
 APOD_URL = Template("https://api.nasa.gov/planetary/apod?api_key=$api_key")
-ROVER_DATA_URL = Template(
-    "https://api.nasa.gov/mars-photos/api/v1/rovers/$name?api_key=$api_key"
-)
+ROVER_DATA_URL = Template("https://api.nasa.gov/mars-photos/api/v1/rovers/$name?api_key=$api_key")
 ROVER_PHOTOS_URL = Template(
     "https://api.nasa.gov/mars-photos/api/v1/rovers/$name/photos?$date_arg&api_key=$api_key"
 )
@@ -84,9 +82,7 @@ class Space(BotCog):
         rover_name = name.value if name else random.choice(list(Rovers)).value
         date_arg = await rover_date_arg(rover_name, date)
 
-        url = ROVER_PHOTOS_URL.substitute(
-            name=rover_name, date_arg=date_arg, api_key=NASA_API_KEY
-        )
+        url = ROVER_PHOTOS_URL.substitute(name=rover_name, date_arg=date_arg, api_key=NASA_API_KEY)
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 data = await response.json()
@@ -95,9 +91,7 @@ class Space(BotCog):
             raise CommandError("No pictures found, try again.", True)
         photo = random.choice(data["photos"])
 
-        embed = discord.Embed(
-            timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d")
-        )
+        embed = discord.Embed(timestamp=datetime.strptime(photo["earth_date"], "%Y-%m-%d"))
         embed.set_author(name=photo["rover"]["name"])
         embed.set_image(url=photo["img_src"])
         await interaction.followup.send(embed=embed)
