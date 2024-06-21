@@ -199,7 +199,7 @@ class Music(BotCog):
     async def queue(self, interaction: Interaction) -> None:
         """Shows the current queue."""
         assert interaction.guild is not None
-        if self.queues.get(interaction.guild.id) is None:
+        if not self.queues.get(interaction.guild.id):
             raise CommandError("Queue is empty.", True)
 
         queue = self.queues[interaction.guild.id]
