@@ -1,0 +1,20 @@
+[project]
+name = "my-discord-bot"
+version = "0.0.0"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.12.13",
+    "discord-py[voice]>=2.5.2",
+    "envkit>=0.3.1",
+    "youtube-dl",
+]
+
+[tool.uv.sources]
+youtube-dl = { git = "https://github.com/ytdl-org/ytdl-nightly.git", rev = "release" }
+
+[project.scripts]
+my_discord_bot = "my_discord_bot:main"
+
+[build-system]
+requires = ["uv_build>=0.7.19,<0.8.0"]
+build-backend = "uv_build"

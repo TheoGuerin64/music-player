@@ -1,10 +1,7 @@
 # My Discord Bot
 
-**THIS PROJECT IS NOT MAINTAINED ANYMORE, USE SOMETHING ELSE**
-
-My personal Discord bot features: trivia, space images, music, and admin slash commands.
+My personal Discord bot features: music.
 
 ## .env
 
-- TOKEN: Discord Bot token
-- NASA_API_KEY: NASA API key
+- DISCORD_TOKEN: Discord Bot token

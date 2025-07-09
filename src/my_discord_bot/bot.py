@@ -5,8 +5,8 @@ from discord.app_commands import AppCommandError
 from discord.app_commands.errors import CommandInvokeError
 from discord.ext import commands
 
-from .cogs import COGS
-from .exceptions import CommandError
+from my_discord_bot.cogs import COGS
+from my_discord_bot.exceptions import CommandError
 
 logger = logging.getLogger("discord")
 
@@ -14,7 +14,7 @@ logger = logging.getLogger("discord")
 class MyBot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(
-            intents=Intents.all(),
+            intents=Intents.default(),
             command_prefix=(),
             activity=Activity(type=ActivityType.playing, name="/play"),
         )
@@ -27,9 +27,8 @@ class MyBot(commands.Bot):
                 logger.error(f"Failed to load cog: {e}")
         logger.info("Cogs loaded.")
 
-        if not __debug__:
-            await self.tree.sync()
-            logger.info("Tree synced.")
+        await self.tree.sync()
+        logger.info("Tree synced.")
 
     async def on_ready(self) -> None:
         assert self.user is not None

@@ -1,30 +1,23 @@
-FROM python:3.12-slim AS builder
-
-RUN apt-get update && apt-get install -y --no-install-recommends git
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
-RUN pip3 install --no-cache-dir --upgrade pip
-
-COPY ./requirements.txt ./requirements.txt
-RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
-
-FROM python:3.12-slim AS base
-
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-
+FROM python:3.13-slim AS base
 WORKDIR /app
 
-COPY . /app/
+FROM base AS builder
+RUN apt-get update &&\
+    apt-get install -y git &&\
+    rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-editable
+COPY src/ src/
+RUN uv sync --frozen --no-editable
 
-FROM base AS dev
-
-CMD ["python3.12", "-m", "my_discord_bot"]
-
-FROM base AS prod
-
-CMD ["python3.12", "-O", "-m", "my_discord_bot"]
+FROM base
+RUN apt-get update &&\
+    apt-get install -y ffmpeg &&\
+    rm -rf /var/lib/apt/lists/*
+RUN groupadd -r -g 1000 app && useradd -r -u 1000 -g 1000 -m app
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
+USER app
+CMD ["my_discord_bot"]

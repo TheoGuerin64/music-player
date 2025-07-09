@@ -9,8 +9,8 @@ import youtube_dl
 from discord import Interaction, app_commands
 from discord.ext import commands
 
-from ..exceptions import CommandError
-from .bot_cog import BotCog
+from my_discord_bot.cogs.bot_cog import BotCog
+from my_discord_bot.exceptions import CommandError
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
@@ -26,6 +26,15 @@ YTDL_FORMAT_OPTIONS = {
     "no_warnings": True,
     "default_search": "auto",
     "source_address": "0.0.0.0",
+    "force-ipv4": True,
+    "skip_download": True,
+    "postprocessors": [
+        {
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }
+    ],
 }
 
 logger = logging.getLogger(__name__)
@@ -66,7 +75,9 @@ class Music(BotCog):
     @app_commands.command()
     @app_commands.describe()
     @app_commands.guild_only()
-    async def join(self, interaction: Interaction, channel: Optional[discord.VoiceChannel]) -> None:
+    async def join(
+        self, interaction: Interaction, channel: Optional[discord.VoiceChannel]
+    ) -> None:
         """Join the voice channel.
 
         Args:
@@ -112,9 +123,13 @@ class Music(BotCog):
             raise CommandError("Bot is not connected to a voice channel.", True)
 
         assert isinstance(interaction.guild.voice_client, discord.VoiceClient)
-        assert isinstance(interaction.guild.voice_client.source, discord.PCMVolumeTransformer)
+        assert isinstance(
+            interaction.guild.voice_client.source, discord.PCMVolumeTransformer
+        )
         interaction.guild.voice_client.source.volume = volume / 100
-        await interaction.response.send_message(f"Changed volume to {volume}%", ephemeral=True)
+        await interaction.response.send_message(
+            f"Changed volume to {volume}%", ephemeral=True
+        )
 
     @app_commands.command()
     @app_commands.describe()
@@ -183,7 +198,9 @@ class Music(BotCog):
         else:
             raise CommandError("Queue is full.", True)
 
-        await interaction.followup.send(f"Added to queue: {player.title}", ephemeral=True)
+        await interaction.followup.send(
+            f"Added to queue: {player.title}", ephemeral=True
+        )
 
     @app_commands.command()
     @app_commands.describe()
@@ -216,4 +233,6 @@ class Music(BotCog):
         if song is None:
             raise CommandError("No song is currently playing.", True)
 
-        await interaction.response.send_message(f"Currently playing: {song.title}", ephemeral=True)
+        await interaction.response.send_message(
+            f"Currently playing: {song.title}", ephemeral=True
+        )
