@@ -6,14 +6,12 @@ from dataclasses import dataclass
 from typing import Any, Self
 
 import discord
-import youtube_dl
+import yt_dlp
 from discord import AudioSource, Interaction, app_commands
 from discord.ext import commands, tasks
 
 from music_player.cogs.bot_cog import BotCog
 from music_player.exceptions import CommandError
-
-youtube_dl.utils.bug_reports_message = lambda: ""
 
 YTDL_FORMAT_OPTIONS = {
     "format": "bestaudio/best",
@@ -41,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    _ytdl = youtube_dl.YoutubeDL(YTDL_FORMAT_OPTIONS)
+    _ytdl = yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS)
 
     def __init__(
         self, source: AudioSource, data: dict[str, Any], *, volume: float = 0.5

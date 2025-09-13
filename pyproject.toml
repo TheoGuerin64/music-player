@@ -6,11 +6,8 @@ dependencies = [
     "aiohttp>=3.12.13",
     "discord-py[voice]>=2.5.2",
     "envkit>=0.3.1",
-    "youtube-dl",
+    "yt-dlp>=2025.9.5",
 ]
-
-[tool.uv.sources]
-youtube-dl = { git = "https://github.com/ytdl-org/ytdl-nightly.git", rev = "release" }
 
 [project.scripts]
 music_player = "music_player:main"
