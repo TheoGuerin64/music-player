@@ -32,7 +32,7 @@ FFMPEG_OPTIONS: dict[str, Any] = {
     "options": "-vn",
 }
 
-QUEUE_SIZE = 10
+QUEUE_SIZE = 9
 
 logger = logging.getLogger(__name__)
 
@@ -264,7 +264,7 @@ class Music(BotCog):
         source = await YTDLSource.from_query(
             query, loop=self.bot.loop, volume=self.volume_value
         )
-        if len(guild_state.source_queue) < QUEUE_SIZE:
+        if len(guild_state.source_queue) <= QUEUE_SIZE:
             guild_state.source_queue.appendleft(source)
         else:
             message = "Queue is full."
