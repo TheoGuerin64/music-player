@@ -8,7 +8,7 @@ from discord.ext import commands
 from music_player.cogs import COGS
 from music_player.exceptions import CommandError
 
-logger = logging.getLogger("discord")
+logger = logging.getLogger("discord.bot")
 
 
 class MyBot(commands.Bot):
@@ -27,8 +27,13 @@ class MyBot(commands.Bot):
                 logger.error(f"Failed to load cog: {e}")
         logger.info("Cogs loaded.")
 
-        await self.tree.sync()
+        try:
+            await self.tree.sync()
+        except Exception as e:
+            logger.error(f"Failed to sync tree: {e}")
         logger.info("Tree synced.")
+
+        self.tree.on_error = self.on_error
 
     async def on_ready(self) -> None:
         assert self.user is not None

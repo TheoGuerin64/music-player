@@ -8,9 +8,9 @@ RUN apt-get update &&\
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-editable
+    uv sync --locked --no-install-project --no-editable
 COPY src/ src/
-RUN uv sync --frozen --no-editable
+RUN uv sync --locked --no-editable
 
 FROM base
 RUN apt-get update &&\
