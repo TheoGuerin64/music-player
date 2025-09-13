@@ -20,4 +20,4 @@ RUN groupadd -r -g 1000 app && useradd -r -u 1000 -g 1000 -m app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 USER app
-CMD ["my_discord_bot"]
+CMD ["music_player"]

@@ -1,6 +1,6 @@
-# My Discord Bot
+# Music Player
 
-My personal Discord bot features: music.
+A simple music player bot for Discord.
 
 ## .env
 

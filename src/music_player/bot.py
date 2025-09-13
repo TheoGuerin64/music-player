@@ -5,8 +5,8 @@ from discord.app_commands import AppCommandError
 from discord.app_commands.errors import CommandInvokeError
 from discord.ext import commands
 
-from my_discord_bot.cogs import COGS
-from my_discord_bot.exceptions import CommandError
+from music_player.cogs import COGS
+from music_player.exceptions import CommandError
 
 logger = logging.getLogger("discord")
 

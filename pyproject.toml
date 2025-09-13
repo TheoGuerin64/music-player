@@ -1,5 +1,5 @@
 [project]
-name = "my-discord-bot"
+name = "music-player"
 version = "0.0.0"
 requires-python = ">=3.13"
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
 youtube-dl = { git = "https://github.com/ytdl-org/ytdl-nightly.git", rev = "release" }
 
 [project.scripts]
-my_discord_bot = "my_discord_bot:main"
+music_player = "music_player:main"
 
 [build-system]
 requires = ["uv_build>=0.7.19,<0.8.0"]

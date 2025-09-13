@@ -9,8 +9,8 @@ import youtube_dl
 from discord import Interaction, app_commands
 from discord.ext import commands
 
-from my_discord_bot.cogs.bot_cog import BotCog
-from my_discord_bot.exceptions import CommandError
+from music_player.cogs.bot_cog import BotCog
+from music_player.exceptions import CommandError
 
 youtube_dl.utils.bug_reports_message = lambda: ""
 
