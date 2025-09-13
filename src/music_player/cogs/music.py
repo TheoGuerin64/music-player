@@ -55,7 +55,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def from_query(
         cls, query: str, *, loop: AbstractEventLoop | None = None, volume: float = 0.5
     ) -> Self:
-        loop = loop or asyncio.get_event_loop()
+        loop = loop or asyncio.get_running_loop()
         data = await loop.run_in_executor(
             None, lambda: cls._ytdl.extract_info(query, download=False)
         )
