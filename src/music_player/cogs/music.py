@@ -37,19 +37,23 @@ QUEUE_SIZE = 9
 logger = logging.getLogger(__name__)
 
 
-class YTDLSource(discord.PCMVolumeTransformer):
+class YTDLSource:
     _ytdl = yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS)
 
-    def __init__(
-        self, source: AudioSource, data: dict[str, Any], *, volume: float = 0.5
-    ) -> None:
-        super().__init__(source, volume)
+    def __init__(self, data: dict[str, Any], *, volume: float = 0.5) -> None:
+        self.url = data["url"]
+        self.volume = volume
+
         self.title = data["title"]
-        self.url = data["webpage_url"]
+        self.webpage_url = data["webpage_url"]
         self.channel = data["channel"]
         self.channel_url = data["channel_url"]
         self.duration = data["duration"]
         self.thumbnail = data["thumbnails"][0]["url"]
+
+    def audio(self) -> AudioSource:
+        source = discord.FFmpegPCMAudio(self.url, **FFMPEG_OPTIONS)
+        return discord.PCMVolumeTransformer(source, volume=self.volume)
 
     @classmethod
     async def from_query(
@@ -64,8 +68,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if "entries" in data:
             data = data["entries"][0]
 
-        source = discord.FFmpegPCMAudio(data["url"], **FFMPEG_OPTIONS)
-        return cls(source, data, volume=volume)
+        return cls(data, volume=volume)
 
 
 def source_embed(source: YTDLSource) -> discord.Embed:
@@ -79,7 +82,7 @@ def source_embed(source: YTDLSource) -> discord.Embed:
 
     embed = discord.Embed(
         title=source.title,
-        url=source.url,
+        url=source.webpage_url,
         description=duration,
     )
     embed.set_author(name=source.channel, url=source.channel_url)
@@ -303,7 +306,7 @@ class Music(BotCog):
                 continue
 
             next_song = guild_state.source_queue.pop()
-            voice_client.play(next_song)
+            voice_client.play(next_song.audio())
             guild_state.current_song = next_song
 
     @player_loop.before_loop
