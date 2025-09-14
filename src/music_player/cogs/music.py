@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from asyncio import AbstractEventLoop
 from collections import deque
 from dataclasses import dataclass
@@ -33,8 +32,6 @@ FFMPEG_OPTIONS: dict[str, Any] = {
 }
 
 QUEUE_SIZE = 9
-
-logger = logging.getLogger(__name__)
 
 
 class YTDLSource:
