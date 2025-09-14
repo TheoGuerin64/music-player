@@ -12,7 +12,7 @@ from discord.ext import commands, tasks
 from music_player.cogs.bot_cog import BotCog
 from music_player.exceptions import CommandError
 
-YTDL_FORMAT_OPTIONS = {
+YTDL_FORMAT_OPTIONS: dict[str, Any] = {
     "format": "bestaudio/best",
     "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
     "restrictfilenames": True,
@@ -35,7 +35,7 @@ QUEUE_SIZE = 9
 
 
 class YTDLSource:
-    _ytdl = yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS)
+    _ytdl = yt_dlp.YoutubeDL(YTDL_FORMAT_OPTIONS)  # type: ignore[reportArgumentType]
 
     def __init__(self, data: dict[str, Any], *, volume: float = 0.5) -> None:
         self.url = data["url"]
@@ -65,7 +65,7 @@ class YTDLSource:
         if "entries" in data:
             data = data["entries"][0]
 
-        return cls(data, volume=volume)
+        return cls(data, volume=volume)  # type: ignore[reportArgumentType]
 
 
 def source_embed(source: YTDLSource) -> discord.Embed:
