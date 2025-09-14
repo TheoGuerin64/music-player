@@ -1,10 +1,7 @@
-# My Discord Bot
+# Music Player
 
-**THIS PROJECT IS NOT MAINTAINED ANYMORE, USE SOMETHING ELSE**
-
-My personal Discord bot features: trivia, space images, music, and admin slash commands.
+A simple music player bot for Discord.
 
 ## .env
 
-- TOKEN: Discord Bot token
-- NASA_API_KEY: NASA API key
+- DISCORD_TOKEN: Discord Bot token

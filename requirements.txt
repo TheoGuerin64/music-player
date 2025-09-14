@@ -1,3 +1,0 @@
-discord.py[voice]
-aiohttp
-git+https://github.com/ytdl-org/ytdl-nightly.git@release

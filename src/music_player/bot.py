@@ -5,16 +5,16 @@ from discord.app_commands import AppCommandError
 from discord.app_commands.errors import CommandInvokeError
 from discord.ext import commands
 
-from .cogs import COGS
-from .exceptions import CommandError
+from music_player.cogs import COGS
+from music_player.exceptions import CommandError
 
-logger = logging.getLogger("discord")
+logger = logging.getLogger("discord.bot")
 
 
 class MyBot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(
-            intents=Intents.all(),
+            intents=Intents.default(),
             command_prefix=(),
             activity=Activity(type=ActivityType.playing, name="/play"),
         )
@@ -27,9 +27,13 @@ class MyBot(commands.Bot):
                 logger.error(f"Failed to load cog: {e}")
         logger.info("Cogs loaded.")
 
-        if not __debug__:
+        try:
             await self.tree.sync()
-            logger.info("Tree synced.")
+        except Exception as e:
+            logger.error(f"Failed to sync tree: {e}")
+        logger.info("Tree synced.")
+
+        self.tree.on_error = self.on_error
 
     async def on_ready(self) -> None:
         assert self.user is not None
