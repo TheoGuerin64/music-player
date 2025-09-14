@@ -74,11 +74,9 @@ class YTDLSource:
 def source_embed(source: YTDLSource) -> discord.Embed:
     minutes, seconds = divmod(source.duration, 60)
     hours, minutes = divmod(minutes, 60)
-    duration = (
-        f"{hours:d}:{minutes:02d}:{seconds:02d}"
-        if hours
-        else f"{minutes:d}:{seconds:02d}"
-    )
+    duration = f"{minutes:d}:{seconds:02d}"
+    if hours:
+        duration = f"{hours:d}:{duration}"
 
     embed = discord.Embed(
         title=source.title,
