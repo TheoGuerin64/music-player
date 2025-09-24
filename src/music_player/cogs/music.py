@@ -24,6 +24,7 @@ YTDL_FORMAT_OPTIONS: dict[str, Any] = {
     "no_warnings": True,
     "default_search": "auto",
     "source_address": "0.0.0.0",
+    "force_ipv4": True
 }
 
 FFMPEG_OPTIONS: dict[str, Any] = {
